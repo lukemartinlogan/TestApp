@@ -15,7 +15,7 @@
 *      devices and their signal strengths. This list will be updated every 500ms
 *      over a user-defined period of time.
 *   4. After the scan finishes, we will upload the following records to the database:
-*       [Test Case ID][Building][floor_true][x_true][y_true][Scan Period][Major][Minor][Time][RSSI]
+*       [Test Case ID][Building][floor_true][x_true][y_true][Scan Period][Major][Minor][RSSI]
 *       - NOTE: test case IDs will be randomly generated. This **may** produce conflicts
 *         in the test cases.
 * */
