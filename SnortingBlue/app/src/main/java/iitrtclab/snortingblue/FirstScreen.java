@@ -2,16 +2,14 @@
 /*
 * The way this program works is as follows:
 *   1. The user will input their test information into the first screen
-*       - Need a list of buildings who have maps
-*       - Need to retrieve the maps from the DB
-*       - Need to display map with dot
-*       - Click on the map
+*       - Position of the tester: (Building, Floor, x, y)
+*       - Duration: the number of seconds to scan for
 *   2. They will click the "start" button, get them to the second
 *      screen and start a bluetooth scan
-*       - The second screen will replace the start button with a countdown.
-*       - If the user presses the countdown, the test case will end and the
+*       - The second screen will replace the start button with a progress bar.
+*       - If the user presses the cancel button, the test case will end and the
 *         user will be taken back to the first screen
-*       - If the countdown reaches 0, the test case will end and the user
+*       - If the scan completes, the test case will end and the user
 *         will be taken back to the first screen
 *   3. During the bluetooth scan, we will compile a list of all nearby bluetooth
 *      devices and their signal strengths. This list will be updated every 500ms
