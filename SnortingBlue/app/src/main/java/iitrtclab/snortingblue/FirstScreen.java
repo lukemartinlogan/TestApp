@@ -189,9 +189,9 @@ public class FirstScreen extends AppCompatActivity  {
 
         try {
             getResources().getAssets().open(building + "-" + floor + ".html");
-            mapInterface.setMap(path);
             mapInterface.toggleSettingLocation(true);
             mapInterface.setTestingLocation(0,0);
+            mapInterface.setMap(path);
         }
         catch(Exception e) {
             if(map.getUrl() != null)

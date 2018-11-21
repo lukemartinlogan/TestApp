@@ -40,19 +40,19 @@ import android.widget.TextView;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.LinkedList;
 import java.util.Locale;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MapInterface extends WebViewClient {
 
     /*CONSTANT AND VARIABLE DECLARATION*/
 
-    ReentrantLock lock = new ReentrantLock();
-    LinkedList<Integer> queue = new LinkedList<Integer>();
+    //WebView Information
     boolean loaded = false;
     WebView map;
     Activity context;
+    boolean enableLocSetting = true;
+
+    //Test case data
     double x=0, y=0;           //The location of the tester
     TextView xView, yView;
 
@@ -84,151 +84,61 @@ public class MapInterface extends WebViewClient {
     * */
 
     public void onPageFinished(WebView view, String url) {
-        //System.out.println("PAGE FINISHED!!! " + url);
         loaded = true;
+        map.loadUrl("javascript:setTestingLocation(" + x + "," + y + ")");
+        map.loadUrl("javascript:toggleSettingLocation(" + enableLocSetting + "," + "true" + ")");
 
     }
 
 
     /*
-    * This function enqueues a call to
-    * one of the functions below.
-    * */
-
-    private int enqueueFunction() {
-        lock.lock();
-        int id = 0;
-        if(queue.size() > 0)
-            id = queue.getLast() + 1;
-        queue.add(id);
-        lock.unlock();
-        return id;
-    }
-
-
-    /*
-    * This function dequeues a function
-    * */
-
-    private void dequeueFunction(int id) {
-        lock.lock();
-        queue.removeFirst();
-        lock.unlock();
-    }
-
-
-    /*
-    * This function is called when the map is going to be set
+    * This function is called when the map is going to be set.
+    * I assume this is called on the UI thread.
     * */
 
     public void setMap(String path) {
-
-        int id = enqueueFunction();
-        Thread t = new Thread(new MapRunnable(path, id, this) {
-            @Override
-            public void run() {
-
-                while(queue.getFirst() != id);
-                loaded = false;
-
-                master.context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //System.out.println("SET MAP!!! " + path);
-                        map.loadUrl(path);
-                        dequeueFunction(id);
-                    }
-                });
-            }
-        });
-
-        t.start();
+        map.loadUrl(path);
     }
 
 
     /*
     * This function enables and disables the ability
-    * to set locations on the map
+    * to set locations on the map. I assume this is
+    * called before setMap.
     * */
 
-    public void toggleSettingLocation(boolean val) {
-
-        int id = enqueueFunction();
-
-        Thread t = new Thread(new MapRunnable(val, id,this) {
-            @Override
-            public void run() {
-
-                while(queue.getFirst() != id);
-                while(!master.loaded);
-
-                master.context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //System.out.println("TOGGLE SETTING LOCATION!!!");
-                        map.loadUrl("javascript:toggleSettingLocation(" + enableLocSetting + "," + "true" + ")");
-                        dequeueFunction(id);
-                    }
-                });
-            }
-        });
-
-        t.start();
+    public void toggleSettingLocation(boolean enableLocSetting) {
+        this.enableLocSetting = enableLocSetting;
     }
 
+
     /*
-    * This function sets the location of the
-    * tester on the map. NOTE: x and y are
-    * in real-world coordinates.
+    * This function sets the position of the tester. I assume
+    * this is called before setMap.
     * */
 
     public void setTestingLocation(double x, double y) {
         this.x = x;
         this.y = y;
-
-        int id = enqueueFunction();
-        //System.out.println("SET TESTING LOCATION_1!!!");
-        Thread t = new Thread(new MapRunnable(x, y, id, this) {
-            @Override
-            public void run() {
-
-                while(queue.getFirst() != id);
-                while(!master.loaded);
-
-                master.context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //System.out.println("SET TESTING LOCATION!!!");
-                        map.loadUrl("javascript:setTestingLocation(" + x + "," + y + ")");
-                        dequeueFunction(id);
-                    }
-                });
-            }
-        });
-
-        t.start();
     }
+
 
     /*
     * This function will render a beacon on
-    * the map
+    * the map. I assume this is called after
+    * setMap.
     * */
 
     public void renderBeaconByMajorMinor(int major, int minor, int rssi) {
 
-        int id = enqueueFunction();
-        Thread t = new Thread(new MapRunnable(major, minor, rssi, id, this) {
+        Thread t = new Thread(new MapRunnable(major, minor, rssi, this) {
             @Override
             public void run() {
-
-                while(queue.getFirst() != id);
                 while(!master.loaded);
-
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         map.loadUrl("javascript:renderBeaconByMajorMinor(" + major + "," + minor + "," + rssi + "," + "true" + ")");
-                        dequeueFunction(id);
                     }
                 });
             }
@@ -245,25 +155,8 @@ public class MapInterface extends WebViewClient {
      * */
 
     public void removeAllBeacons() {
-
-        int id = enqueueFunction();
-        Thread t = new Thread(new MapRunnable(id, this) {
-            @Override
-            public void run() {
-                while(!master.loaded);
-                master.context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        map.loadUrl("javascript:removeAllBeacons()");
-                    }
-                });
-            }
-        });
-
-        t.start();
+        //map.loadUrl("javascript:removeAllBeacons()");
     }
-
-
 
 
 
