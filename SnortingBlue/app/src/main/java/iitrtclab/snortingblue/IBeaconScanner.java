@@ -202,7 +202,6 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
-
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
                 os.writeBytes(getParamString(beacon).toString());
                 os.flush();
@@ -212,6 +211,10 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 }
                 os.close();
                 conn.disconnect();
+
+                if(conn.getResponseCode() != 200) {
+                    
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
