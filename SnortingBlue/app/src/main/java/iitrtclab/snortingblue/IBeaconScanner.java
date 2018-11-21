@@ -211,10 +211,6 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 }
                 os.close();
                 conn.disconnect();
-
-                if(conn.getResponseCode() != 200) {
-                    
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();
