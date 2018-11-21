@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.util.Log;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
@@ -64,7 +65,6 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     private String building;
     private LinkedList<IBeacon> beaconList;
     String url_str = "https://api.iitrtclab.com/test";
-
 
 
 
@@ -158,12 +158,13 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     public void run() {
         if(current_time >= scan_period) {
             stop();
-            UploadRecord();
+            String errors = uploadRecord();
+            errorDialog(errors);
             finish();
             return;
         }
         current_time += period;
-        UpdateProgress();
+        updateProgress();
     }
 
 
@@ -172,7 +173,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     * so that users have a sense of how much time has elapsed.
     * */
 
-    private void UpdateProgress() {
+    private void updateProgress() {
         ((Activity)context).runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -188,10 +189,13 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     * of the beacons detected during the scan and passing
     * their attributes as parameters to an HTTP POST method.
     * */
-    private void UploadRecord() {
+    private String uploadRecord() {
+
+        String error_str = "";
+
         try {
             for(IBeacon beacon: beaconList) {
-                URL url = new URL("https://api.iitrtclab.com/test");
+                URL url = new URL(url_str);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
@@ -202,12 +206,19 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
                 os.writeBytes(getParamString(beacon).toString());
                 os.flush();
+
+                if(conn.getResponseCode() != 200) {
+                    error_str += "Error " + conn.getResponseCode() + ": " + conn.getResponseMessage() + "\n";
+                }
                 os.close();
                 conn.disconnect();
             }
         } catch (Exception e) {
             e.printStackTrace();
+            error_str += e.getStackTrace();
         }
+
+        return error_str;
     }
 
 
@@ -234,6 +245,31 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
 
 
     /*
+    * This function is called if there were problems
+    * uploading records to the database. It will
+    * display a log of the errors that occurred in
+    * a new screen.
+    * */
+
+    private void errorDialog(String errors) {
+        if(errors == "")
+            return;
+
+        Intent intent = new Intent(context, ThirdScreen.class);
+
+        //Give the inputs to the second screen
+        intent.putExtra(SecondScreen.errorDialogKey, errors);
+
+        //Launch second screen
+        context.startActivity(intent);
+    }
+
+
+
+    /*CALLBACK FUNCTIONS*/
+
+
+    /*
      * This function gets called upon the call to
      * beaconManager.bind(). This is what truly
      * turns on the bluetooth scanner.
@@ -252,7 +288,6 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
             stop();
         }
     }
-
 
 
     /*
@@ -275,10 +310,6 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
         return context.bindService(intent,serviceConnection,i);
     }
 
-
-
-
-    /*CALLBACK FUNCTIONS*/
 
     /*
      * This is a callback function that will be used

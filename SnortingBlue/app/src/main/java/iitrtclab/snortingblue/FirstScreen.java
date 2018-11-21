@@ -22,7 +22,7 @@
 
 /*
 * This file will allow users to define the parameters of a test case:
-*   - Position of the tester: (Building, Floor, x, y)
+*   - Position of the tester: (Building, floor_true, x_true, y_true)
 *   - Duration: the number of seconds to scan for
 * */
 
@@ -259,6 +259,7 @@ public class FirstScreen extends AppCompatActivity  {
                 BuildingFloors.setAdapter(adapter);
                 UpdateMap(building, "0");
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

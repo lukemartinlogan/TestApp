@@ -29,13 +29,14 @@ public class SecondScreen extends AppCompatActivity {
     /*CONSTANT and VARIABLE DECLARATIONS*/
 
     private IBeaconScanner testCase;
+    public static final String errorDialogKey = "SnortingBlue.errorDialogKey";
 
 
     /*METHODS*/
 
     /*
     * This function will display the information
-    * on the last screen except not allow the
+    * on the previous screen except not allow the
     * user to modify the information. It will
     * also create and upload the test case
     * to the database
@@ -47,42 +48,42 @@ public class SecondScreen extends AppCompatActivity {
         setContentView(R.layout.activity_second_screen);
 
         //Get the test case parameter strings
-        Intent intent = getIntent();
-        String X = intent.getStringExtra(FirstScreen.strX);
-        String Y = intent.getStringExtra(FirstScreen.strY);
-        String Building = intent.getStringExtra(FirstScreen.strBuilding);
-        String Floor = intent.getStringExtra(FirstScreen.strFloor);
-        String Duration = intent.getStringExtra(FirstScreen.strDur);
-
-        //Get text views
-        TextView Xstatic = findViewById(R.id.Xstatic);
-        TextView Ystatic = findViewById(R.id.Ystatic);
-        TextView BuildingStatic = findViewById(R.id.BuildingStatic);
-        TextView DurationStatic = findViewById(R.id.DurationStatic);
-
-        //Set the text views to those strings
-        Xstatic.setText("X: " + X);
-        Ystatic.setText("Y: " + Y);
-        BuildingStatic.setText("Building: " + Building + "-" +  Floor);
-        DurationStatic.setText("Duration: " + Duration);
-
-        //Recreate the map view
-        WebView map = findViewById(R.id.MapStatic);
-        MapInterface mapInterface = new MapInterface(this, Xstatic, Ystatic, map);
-        map.getSettings().setJavaScriptEnabled(true);
-        map.getSettings().setBuiltInZoomControls(true);
-        map.setWebViewClient(mapInterface);
-
-        //Get test information
-        mapInterface.setMap("file:///android_asset/" + Building + "-" + Floor + ".html");
-        mapInterface.toggleSettingLocation(false);
-        mapInterface.setTestingLocation(Double.parseDouble(X), Double.parseDouble(Y));
-
-        //Create bluetooth scanner
-        testCase = new IBeaconScanner(this, mapInterface, (ProgressBar)findViewById(R.id.progressBar2), .5);
-
-        //Perform scan
         try {
+            Intent intent = getIntent();
+            String X = intent.getStringExtra(FirstScreen.strX);
+            String Y = intent.getStringExtra(FirstScreen.strY);
+            String Building = intent.getStringExtra(FirstScreen.strBuilding);
+            String Floor = intent.getStringExtra(FirstScreen.strFloor);
+            String Duration = intent.getStringExtra(FirstScreen.strDur);
+
+            //Get text views
+            TextView Xstatic = findViewById(R.id.Xstatic);
+            TextView Ystatic = findViewById(R.id.Ystatic);
+            TextView BuildingStatic = findViewById(R.id.BuildingStatic);
+            TextView DurationStatic = findViewById(R.id.DurationStatic);
+
+            //Set the text views to those strings
+            Xstatic.setText("X: " + X);
+            Ystatic.setText("Y: " + Y);
+            BuildingStatic.setText("Building: " + Building + "-" +  Floor);
+            DurationStatic.setText("Duration: " + Duration);
+
+            //Recreate the map view
+            WebView map = findViewById(R.id.MapStatic);
+            MapInterface mapInterface = new MapInterface(this, Xstatic, Ystatic, map);
+            map.getSettings().setJavaScriptEnabled(true);
+            map.getSettings().setBuiltInZoomControls(true);
+            map.setWebViewClient(mapInterface);
+
+            //Set test information
+            mapInterface.setMap("file:///android_asset/" + Building + "-" + Floor + ".html");
+            mapInterface.toggleSettingLocation(false);
+            mapInterface.setTestingLocation(Double.parseDouble(X), Double.parseDouble(Y));
+
+            //Create bluetooth scanner
+            testCase = new IBeaconScanner(this, mapInterface, (ProgressBar)findViewById(R.id.progressBar2), .5);
+
+            //Perform scan
             double x = Double.parseDouble(X);
             double y = Double.parseDouble(Y);
             int floor = Integer.parseInt(Floor);
