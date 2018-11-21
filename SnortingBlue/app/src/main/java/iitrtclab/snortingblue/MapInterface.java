@@ -6,6 +6,15 @@
 * set the position of the tester on the map.
 * */
 
+
+/*
+* We have to make sure that the operations execute
+* sequentially. This is kinda hard to do with WebViews
+* since onPageFinished can be called after loadUrl is
+* called.
+* */
+
+
 package iitrtclab.snortingblue;
 
 import android.app.Activity;
@@ -18,11 +27,13 @@ import android.widget.TextView;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.concurrent.Semaphore;
 
 public class MapInterface extends WebViewClient {
 
     /*CONSTANT AND VARIABLE DECLARATION*/
 
+    Semaphore sem = new Semaphore(1);
     boolean loaded = false;
     WebView map;
     Activity context;
@@ -31,11 +42,6 @@ public class MapInterface extends WebViewClient {
 
 
     /*CONSTRUCTORS*/
-
-    public MapInterface(Activity context, WebView map) {
-        this.map = map;
-        this.context = context;
-    }
 
     public MapInterface(Activity context, TextView xView, TextView yView,  WebView map) {
         this.map = map;
@@ -48,7 +54,7 @@ public class MapInterface extends WebViewClient {
     /*METHODS*/
 
     /*
-    * This function is executed when the map has started loading.
+    * This function is executed when the map html has started loading
     * */
 
     @Override
@@ -57,13 +63,44 @@ public class MapInterface extends WebViewClient {
     }
 
     /*
-    * This function is executed when the map has finished loading.
+    * This function is executed when the map html has finished loading.
     * */
 
     @Override
     public void onPageFinished(WebView view, String url) {
         loaded = true;
     }
+
+
+    /*
+    * This function is called when the map is going to be set
+    * */
+
+    public void setMap(String path) {
+        loaded = false;
+        Thread t = new Thread(new MapRunnable(path, this) {
+            @Override
+            public void run() {
+                try {
+                    sem.acquire();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
+                master.context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        map.loadUrl(path);
+                        sem.release();
+                    }
+                });
+            }
+        });
+
+        t.start();
+    }
+
 
     /*
     * This function enables and disables the ability
@@ -74,11 +111,20 @@ public class MapInterface extends WebViewClient {
         Thread t = new Thread(new MapRunnable(val, this) {
             @Override
             public void run() {
+
                 while(!master.loaded);
+                try {
+                    sem.acquire();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         map.loadUrl("javascript:toggleSettingLocation(" + enableLocSetting + "," + "true" + ")");
+                        sem.release();
                     }
                 });
             }
@@ -86,31 +132,6 @@ public class MapInterface extends WebViewClient {
 
         t.start();
     }
-
-
-    /*
-    * This function removes all of the
-    * beacons being displayed. This function
-    * is unnecessary for now.
-    * */
-
-    public void removeAllBeacons() {
-        Thread t = new Thread(new MapRunnable(this) {
-            @Override
-            public void run() {
-                while(!master.loaded);
-                master.context.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        map.loadUrl("javascript:removeAllBeacons()");
-                    }
-                });
-            }
-        });
-
-        t.start();
-    }
-
 
     /*
     * This function sets the location of the
@@ -126,19 +147,24 @@ public class MapInterface extends WebViewClient {
             @Override
             public void run() {
                 while(!master.loaded);
+                try {
+                    sem.acquire();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         map.loadUrl("javascript:setTestingLocation(" + x + "," + y + ")");
+                        sem.release();
                     }
                 });
             }
         });
 
         t.start();
-
-        System.out.println("HERE" + " " + x + " " + y);
-        setTestingLocationJS(x, y);
     }
 
     /*
@@ -151,10 +177,18 @@ public class MapInterface extends WebViewClient {
             @Override
             public void run() {
                 while(!master.loaded);
+                try {
+                    sem.acquire();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         map.loadUrl("javascript:renderBeaconByMajorMinor(" + major + "," + minor + "," + rssi + "," + "true" + ")");
+                        sem.release();
                     }
                 });
             }
@@ -162,6 +196,44 @@ public class MapInterface extends WebViewClient {
 
         t.start();
     }
+
+
+    /*
+     * This function removes all of the
+     * beacons being displayed. This function
+     * is unnecessary for now.
+     * */
+
+    public void removeAllBeacons() {
+        Thread t = new Thread(new MapRunnable(this) {
+            @Override
+            public void run() {
+                while(!master.loaded);
+                try {
+                    sem.acquire();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
+                master.context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        map.loadUrl("javascript:removeAllBeacons()");
+                        sem.release();
+                    }
+                });
+            }
+        });
+
+        t.start();
+    }
+
+
+
+
+
+    /*JAVASCRIPT INTERFACES*/
 
 
     /*

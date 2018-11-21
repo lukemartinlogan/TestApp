@@ -68,13 +68,13 @@ public class SecondScreen extends AppCompatActivity {
 
         //Recreate the map view
         WebView map = findViewById(R.id.MapStatic);
+        MapInterface mapInterface = new MapInterface(this, Xstatic, Ystatic, map);
         map.getSettings().setJavaScriptEnabled(true);
         map.getSettings().setBuiltInZoomControls(true);
-        map.loadUrl("file:///android_asset/" + Building + "-" + Floor + ".html");
-        MapInterface mapInterface = new MapInterface(this, Xstatic, Ystatic, map);
         map.setWebViewClient(mapInterface);
 
-        //Make the map unclickable and finalize tester's position
+        //Get test information
+        mapInterface.setMap("file:///android_asset/" + Building + "-" + Floor + ".html");
         mapInterface.toggleSettingLocation(false);
         mapInterface.setTestingLocation(Double.parseDouble(X), Double.parseDouble(Y));
 

@@ -162,9 +162,11 @@ public class FirstScreen extends AppCompatActivity  {
 
         //Create the map
         WebView map = findViewById(R.id.Map);
+        mapInterface = new MapInterface(this, (TextView)findViewById(R.id.X), (TextView)findViewById(R.id.Y), map);
         map.getSettings().setJavaScriptEnabled(true);
         map.getSettings().setBuiltInZoomControls(true);
-        mapInterface = new MapInterface(this, (TextView)findViewById(R.id.X), (TextView)findViewById(R.id.Y), map);
+        map.setWebViewClient(mapInterface);
+        map.addJavascriptInterface(mapInterface, "mapInterface");
     }
 
 
@@ -183,14 +185,12 @@ public class FirstScreen extends AppCompatActivity  {
 
         try {
             getResources().getAssets().open(building + "-" + floor + ".html");
-            map.setWebViewClient(mapInterface);
-            map.addJavascriptInterface(mapInterface, "mapInterface");
-            map.loadUrl(path);
+            mapInterface.setMap(path);
             mapInterface.toggleSettingLocation(true);
             mapInterface.setTestingLocation(0,0);
         }
         catch(Exception e) {
-            map.loadUrl("file:///android_asset/default.html");
+            mapInterface.setMap("file:///android_asset/default.html");
         }
     }
 

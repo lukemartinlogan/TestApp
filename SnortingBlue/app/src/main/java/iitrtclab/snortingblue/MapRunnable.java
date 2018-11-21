@@ -19,6 +19,7 @@ public abstract class MapRunnable implements Runnable {
     int major, minor, rssi;
     double x, y;
     TextView xView, yView;
+    String path;
 
     public MapRunnable(MapInterface master) {
         this.master = master;
@@ -47,6 +48,11 @@ public abstract class MapRunnable implements Runnable {
         this.y = y;
         this.xView = xView;
         this.yView = yView;
+        this.master = master;
+    }
+
+    public MapRunnable(String path, MapInterface master) {
+        this.path = path;
         this.master = master;
     }
 
