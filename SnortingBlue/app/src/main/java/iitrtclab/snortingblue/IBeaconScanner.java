@@ -158,21 +158,22 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     public void run() {
         if(current_time >= scan_period) {
             stop();
-            //String errors = uploadRecord();
-            String errors = "Test";
+            String errors = uploadRecord();
+            //String errors = "Test";
             errorDialog(errors);
             finish();
             return;
         }
 
-        int arr[] = new int[4];
+        /*int arr[] = new int[4];
         arr[0] = 518;
         arr[1] = 588;
         arr[2] = 549;
         arr[3] = 584;
         Random rand = new Random();
+        mapInterface.renderBeaconByMajorMinor(1000, arr[rand.nextInt(4)], -90);*/
 
-        mapInterface.renderBeaconByMajorMinor(1000, arr[rand.nextInt(4)], -90);
+
         current_time += period;
         updateProgress();
     }

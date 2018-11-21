@@ -21,12 +21,7 @@
 *   Thus, in order to wait for the page to finish loading, we have two options:
 *   spawn a new thread and wait for the boolean to be set to true and call the
 *   JS function in that new thread OR call the JS function in onPageFinished.
-*   I chose the first option since it's more flexible with where we can call JS.
-*
-*   In order for this to work, we must maintain the order of operations. Any JS
-*   function called before a call to setMap must be executed before we execute
-*   setMap. Thus, I created a queue. Every time we call one of the methods
-*   in this file (setMap, toggleSetLocation, etc), we will add it to the queue.
+*   I chose the second option since it worked.
 * */
 
 package iitrtclab.snortingblue;
