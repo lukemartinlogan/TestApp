@@ -8,10 +8,11 @@
 
 
 /*
-* We have to make sure that the operations execute
-* sequentially. This is kinda hard to do with WebViews
-* since onPageFinished can be called after loadUrl is
-* called.
+* Make sure that operations execute sequentially!
+* Javascript functions can only execute AFTER a
+* page has finished loading. A page has finished
+* loading if onPageFinished is called and onPageStart
+* has not been called.
 * */
 
 

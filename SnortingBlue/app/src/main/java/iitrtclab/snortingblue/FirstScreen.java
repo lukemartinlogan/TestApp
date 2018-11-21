@@ -113,7 +113,7 @@ public class FirstScreen extends AppCompatActivity  {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.INTERNET},
-                    4);
+                    5);
         }
     }
 
