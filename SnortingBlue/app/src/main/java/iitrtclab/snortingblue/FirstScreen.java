@@ -76,6 +76,9 @@ public class FirstScreen extends AppCompatActivity  {
     //The javascript interface to manipulating the map
     MapInterface mapInterface;
 
+    //The default map
+    public static final String default_map = "file:///android_asset/default.html";
+
 
     /*METHODS*/
 
@@ -180,8 +183,9 @@ public class FirstScreen extends AppCompatActivity  {
         WebView map = findViewById(R.id.Map);
         String path = "file:///android_asset/" + building + "-" + floor + ".html";
 
-        if(map.getUrl() == path)
-            return;
+        if(map.getUrl() != null)
+            if(map.getUrl().equals(path))
+                return;
 
         try {
             getResources().getAssets().open(building + "-" + floor + ".html");
@@ -190,7 +194,9 @@ public class FirstScreen extends AppCompatActivity  {
             mapInterface.setTestingLocation(0,0);
         }
         catch(Exception e) {
-            mapInterface.setMap("file:///android_asset/default.html");
+            if(map.getUrl() != null)
+                if(!map.getUrl().equals(default_map))
+                    mapInterface.setMap(default_map);
         }
     }
 
@@ -221,7 +227,7 @@ public class FirstScreen extends AppCompatActivity  {
 
             //Make sure that the map is valid
             WebView map = findViewById(R.id.Map);
-            if (map.getUrl() == "file:///android_asset/default.html")
+            if (map.getUrl().equals(default_map))
                 return;
 
             //Launch second screen

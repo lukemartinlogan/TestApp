@@ -4,17 +4,30 @@
 * using java in order to manipulate the map of a
 * building. This is where you can do stuff like
 * set the position of the tester on the map.
+*
+* NOTES:
+*   We have to wait until a page is loaded before the JavaScript (JS)
+*   apis can be called. A page only begins to load when a call to
+*   setMap is made.
+*
+*   We have a boolean (loaded) to determine whether or not a page
+*   has been loaded. Thus, we must wait for this boolean to be
+*   set to true before we can execute JS functions. However, the
+*   page doesn't begin to load for a little while. And on top of that,
+*   a page gets loaded on the UI thread. In this implementation,
+*   we call JS functions right after a call to setMap on the UI thread.
+*   Thus, we would enter the JS functions before the page begins to load.
+*
+*   Thus, in order to wait for the page to finish loading, we have two options:
+*   spawn a new thread and wait for the boolean to be set to true and call the
+*   JS function in that new thread OR call the JS function in onPageFinished.
+*   I chose the first option since it's more flexible with where we can call JS.
+*
+*   In order for this to work, we must maintain the order of operations. Any JS
+*   function called before a call to setMap must be executed before we execute
+*   setMap. Thus, I created a queue. Every time we call one of the methods
+*   in this file (setMap, toggleSetLocation, etc), we will add it to the queue.
 * */
-
-
-/*
-* Make sure that operations execute sequentially!
-* Javascript functions can only execute AFTER a
-* page has finished loading. A page has finished
-* loading if onPageFinished is called and onPageStart
-* has not been called.
-* */
-
 
 package iitrtclab.snortingblue;
 
@@ -27,14 +40,16 @@ import android.widget.TextView;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.LinkedList;
 import java.util.Locale;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MapInterface extends WebViewClient {
 
     /*CONSTANT AND VARIABLE DECLARATION*/
 
-    Semaphore sem = new Semaphore(1);
+    ReentrantLock lock = new ReentrantLock();
+    LinkedList<Integer> queue = new LinkedList<Integer>();
     boolean loaded = false;
     WebView map;
     Activity context;
@@ -60,6 +75,7 @@ public class MapInterface extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        //System.out.println("PAGE STARTED!!!");
         loaded = false;
     }
 
@@ -67,9 +83,37 @@ public class MapInterface extends WebViewClient {
     * This function is executed when the map html has finished loading.
     * */
 
-    @Override
     public void onPageFinished(WebView view, String url) {
+        //System.out.println("PAGE FINISHED!!! " + url);
         loaded = true;
+
+    }
+
+
+    /*
+    * This function enqueues a call to
+    * one of the functions below.
+    * */
+
+    private int enqueueFunction() {
+        lock.lock();
+        int id = 0;
+        if(queue.size() > 0)
+            id = queue.getLast() + 1;
+        queue.add(id);
+        lock.unlock();
+        return id;
+    }
+
+
+    /*
+    * This function dequeues a function
+    * */
+
+    private void dequeueFunction(int id) {
+        lock.lock();
+        queue.removeFirst();
+        lock.unlock();
     }
 
 
@@ -78,22 +122,21 @@ public class MapInterface extends WebViewClient {
     * */
 
     public void setMap(String path) {
-        loaded = false;
-        Thread t = new Thread(new MapRunnable(path, this) {
+
+        int id = enqueueFunction();
+        Thread t = new Thread(new MapRunnable(path, id, this) {
             @Override
             public void run() {
-                try {
-                    sem.acquire();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
+
+                while(queue.getFirst() != id);
+                loaded = false;
 
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        //System.out.println("SET MAP!!! " + path);
                         map.loadUrl(path);
-                        sem.release();
+                        dequeueFunction(id);
                     }
                 });
             }
@@ -109,23 +152,22 @@ public class MapInterface extends WebViewClient {
     * */
 
     public void toggleSettingLocation(boolean val) {
-        Thread t = new Thread(new MapRunnable(val, this) {
+
+        int id = enqueueFunction();
+
+        Thread t = new Thread(new MapRunnable(val, id,this) {
             @Override
             public void run() {
 
+                while(queue.getFirst() != id);
                 while(!master.loaded);
-                try {
-                    sem.acquire();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
 
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        //System.out.println("TOGGLE SETTING LOCATION!!!");
                         map.loadUrl("javascript:toggleSettingLocation(" + enableLocSetting + "," + "true" + ")");
-                        sem.release();
+                        dequeueFunction(id);
                     }
                 });
             }
@@ -144,22 +186,21 @@ public class MapInterface extends WebViewClient {
         this.x = x;
         this.y = y;
 
-        Thread t = new Thread(new MapRunnable(x, y, this) {
+        int id = enqueueFunction();
+        //System.out.println("SET TESTING LOCATION_1!!!");
+        Thread t = new Thread(new MapRunnable(x, y, id, this) {
             @Override
             public void run() {
+
+                while(queue.getFirst() != id);
                 while(!master.loaded);
-                try {
-                    sem.acquire();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
 
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        //System.out.println("SET TESTING LOCATION!!!");
                         map.loadUrl("javascript:setTestingLocation(" + x + "," + y + ")");
-                        sem.release();
+                        dequeueFunction(id);
                     }
                 });
             }
@@ -174,22 +215,20 @@ public class MapInterface extends WebViewClient {
     * */
 
     public void renderBeaconByMajorMinor(int major, int minor, int rssi) {
-        Thread t = new Thread(new MapRunnable(major, minor, rssi, this) {
+
+        int id = enqueueFunction();
+        Thread t = new Thread(new MapRunnable(major, minor, rssi, id, this) {
             @Override
             public void run() {
+
+                while(queue.getFirst() != id);
                 while(!master.loaded);
-                try {
-                    sem.acquire();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
 
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         map.loadUrl("javascript:renderBeaconByMajorMinor(" + major + "," + minor + "," + rssi + "," + "true" + ")");
-                        sem.release();
+                        dequeueFunction(id);
                     }
                 });
             }
@@ -206,22 +245,16 @@ public class MapInterface extends WebViewClient {
      * */
 
     public void removeAllBeacons() {
-        Thread t = new Thread(new MapRunnable(this) {
+
+        int id = enqueueFunction();
+        Thread t = new Thread(new MapRunnable(id, this) {
             @Override
             public void run() {
                 while(!master.loaded);
-                try {
-                    sem.acquire();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
-
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         map.loadUrl("javascript:removeAllBeacons()");
-                        sem.release();
                     }
                 });
             }

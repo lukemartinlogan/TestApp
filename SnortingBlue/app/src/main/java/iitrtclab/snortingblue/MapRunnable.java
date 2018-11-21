@@ -14,6 +14,7 @@ import java.lang.Runnable;
 
 public abstract class MapRunnable implements Runnable {
 
+    int id;
     MapInterface master;
     boolean enableLocSetting = false;
     int major, minor, rssi;
@@ -21,25 +22,28 @@ public abstract class MapRunnable implements Runnable {
     TextView xView, yView;
     String path;
 
-    public MapRunnable(MapInterface master) {
+    public MapRunnable(int id, MapInterface master) {
         this.master = master;
+        this.id = id;
     }
 
-    public MapRunnable(boolean enableLocSetting, MapInterface master) {
+    public MapRunnable(boolean enableLocSetting, int id, MapInterface master) {
+        this.id = id;
         this.master = master;
         this.enableLocSetting = enableLocSetting;
     }
 
-    public MapRunnable(int major, int minor, int rssi, MapInterface master) {
+    public MapRunnable(int major, int minor, int rssi, int id, MapInterface master) {
         this.major = major;
         this.minor = minor;
-        this.rssi = rssi;
+        this.id = id;
         this.master = master;
     }
 
-    public MapRunnable(double x, double y, MapInterface master) {
+    public MapRunnable(double x, double y, int id, MapInterface master) {
         this.x = x;
         this.y = y;
+        this.id = id;
         this.master = master;
     }
 
@@ -51,8 +55,9 @@ public abstract class MapRunnable implements Runnable {
         this.master = master;
     }
 
-    public MapRunnable(String path, MapInterface master) {
+    public MapRunnable(String path, int id, MapInterface master) {
         this.path = path;
+        this.id = id;
         this.master = master;
     }
 

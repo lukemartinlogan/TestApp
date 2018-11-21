@@ -1,27 +1,31 @@
 
-var c1, c2;
+var c1=null, c2=null;
 
 $(document).ready(function() {
 	const svg = d3.select('svg');
 	svg.attr('width', '100%');
 	svg.attr('height', '100vh');
-	
-
-	c1 = d3.select('svg').append("circle")
-					.attr("cx", 0)
-					.attr("cy", 0)
-					.attr("r", 15);
-
-	c2 = d3.select('svg').append("circle")
-					.attr("cx", 0)
-					.attr("cy", 0)
-					.style("fill", "black")
-					.style("fill-opacity", "0.59")
-					.attr("r", 10)
-					.attr("r", 100);
 });
 
 function setTestingLocation(x, y, mobile) {
+
+	//console.log("SET TESTING LOCATION IN JS!!!");
+
+	if(c1 == null) {
+		c1 = d3.select('svg').append("circle")
+					.attr("cx", 0)
+					.attr("cy", 0)
+					.attr("r", 15);
+	}
+	if(c2 == null) {
+		c2 = d3.select('svg').append("circle")
+						.attr("cx", 0)
+						.attr("cy", 0)
+						.style("fill", "black")
+						.style("fill-opacity", "0.59")
+						.attr("r", 10)
+						.attr("r", 100);
+	}
 
 	c1
 		.attr("cx", mapX(x))
@@ -30,11 +34,29 @@ function setTestingLocation(x, y, mobile) {
 	c2
 		.attr("cx", mapX(x))
 		.attr("cy", mapY(y));
-		
+	
+	
+	//console.log("SET TESTING LOCATION NEARLY OUT OF JS!!!");
 	window.mapInterface.setTestingLocationJS(x, y);
 }
 
 function setTestingLocationPX(x, y, mobile) {
+
+	if(c1 == null) {
+		c1 = d3.select('svg').append("circle")
+					.attr("cx", 0)
+					.attr("cy", 0)
+					.attr("r", 15);
+	}
+	if(c2 == null) {
+		c2 = d3.select('svg').append("circle")
+						.attr("cx", 0)
+						.attr("cy", 0)
+						.style("fill", "black")
+						.style("fill-opacity", "0.59")
+						.attr("r", 10)
+						.attr("r", 100);
+	}
 
 	c1
 		.attr("cx", x)
@@ -72,6 +94,8 @@ function toggleSettingLocation(toggle, mobile) {
 	} else {
 		d3.select('svg').on('click', null);
 	}
+	
+	//console.log("TOGGLE SETTING LOCATION JS!!!\n");
 }
 
 //returns real life x and y from locked origin in meters
