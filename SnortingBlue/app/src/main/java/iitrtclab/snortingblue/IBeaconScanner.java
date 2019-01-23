@@ -193,6 +193,54 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
         });
     }
 
+    /*private String uploadRecord() {
+
+        String error_str = "";
+
+        try {
+            for(int i = 0; i < 5; i++) {
+                URL url = new URL(url_str);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setDoOutput(true);
+                conn.setDoInput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("major", 1000);
+                jsonParam.put("minor", 522);
+                jsonParam.put("rssi", -100000);
+                jsonParam.put("testID", "FAKE_TEST");
+                jsonParam.put("building_id", 5000);
+                jsonParam.put("floor", 1);
+                jsonParam.put("x", 1234);
+                jsonParam.put("y", 1234);
+                jsonParam.put("interval", 5);
+
+                Log.i("JSON", jsonParam.toString());
+                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+
+                os.writeBytes(jsonParam.toString());
+                os.flush();
+
+                Log.i("STATUS + " + i, String.valueOf(conn.getResponseCode()));
+                Log.i("MSG", conn.getResponseMessage());
+
+                if(conn.getResponseCode() != 200) {
+                    error_str += "Error " + conn.getResponseCode() + ": " + conn.getResponseMessage() + "\n";
+                }
+
+                os.close();
+                conn.disconnect();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return error_str;
+    }*/
+
 
     /*
     * This function will upload the test case to the
@@ -200,12 +248,13 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     * of the beacons detected during the scan and passing
     * their attributes as parameters to an HTTP POST method.
     * */
+
     private String uploadRecord() {
 
         String error_str = "";
 
         try {
-            for(IBeacon beacon: beaconList) {
+            for (IBeacon beacon : beaconList) {
                 URL url = new URL(url_str);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
@@ -217,7 +266,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 os.writeBytes(getParamString(beacon).toString());
                 os.flush();
 
-                if(conn.getResponseCode() != 200) {
+                if (conn.getResponseCode() != 200) {
                     error_str += "Error " + conn.getResponseCode() + ": " + conn.getResponseMessage() + "\n";
                 }
                 os.close();

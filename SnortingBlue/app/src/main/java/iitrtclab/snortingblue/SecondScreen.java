@@ -136,11 +136,11 @@ public class SecondScreen extends AppCompatActivity {
                 jsonParam.put("major", 1000);
                 jsonParam.put("minor", 522);
                 jsonParam.put("rssi", -100000);
-                jsonParam.put("testID", "PICKMEPICKME");
-                jsonParam.put("building_id", 4);
+                jsonParam.put("testID", "FAKE_TEST");
+                jsonParam.put("building_id", 5000);
                 jsonParam.put("floor", 1);
-                jsonParam.put("x", "1234");
-                jsonParam.put("y", "1234");
+                jsonParam.put("x", 1234);
+                jsonParam.put("y", 1234);
                 jsonParam.put("interval", 5);
 
                 Log.i("JSON", jsonParam.toString());
