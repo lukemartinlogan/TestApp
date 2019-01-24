@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -51,6 +53,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     private final static String targetUUID = "fda50693-a4e2-4fb1-afcf-c6eb07647825";
     private final static String gateUUID = "A0DF207C-142F-4A39-A457-6FC44D524C04";
     private BeaconManager beaconManager;
+    boolean scan_enabled = false;
 
     //Scan timing information
     private Timer timer = null;         //The timer that will scan for BLE signals
@@ -62,7 +65,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     private int testID;
     private double x, y;
     private int floor;
-    private String building;
+    private int building;
     private LinkedList<IBeacon> beaconList;
     String url_str = "https://api.iitrtclab.com/test";
 
@@ -108,7 +111,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     * every "period" seconds.
     * */
 
-    public void start(String building, int floor, double x, double y, int scan_period) {
+    public void start(int building, int floor, double x, double y, int scan_period) {
         try {
             this.scan_period = scan_period;
             this.building = building;
@@ -118,6 +121,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
             this.current_time = 0;
             this.beaconManager.bind(this);
             this.timer.schedule(this, 0, Math.round(period * 1000));
+            this.scan_enabled = true;
         }
         catch(Exception e) {
             stop();
@@ -133,6 +137,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
         timer.cancel();
         timer.purge();
         beaconManager.unbind(this);
+        scan_enabled = false;
     }
 
 
@@ -159,20 +164,10 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
         if(current_time >= scan_period) {
             stop();
             String errors = uploadRecord();
-            //String errors = "Test";
             errorDialog(errors);
             finish();
             return;
         }
-
-        /*int arr[] = new int[4];
-        arr[0] = 518;
-        arr[1] = 588;
-        arr[2] = 549;
-        arr[3] = 584;
-        Random rand = new Random();
-        mapInterface.renderBeaconByMajorMinor(1000, arr[rand.nextInt(4)], -90);*/
-
 
         current_time += period;
         updateProgress();
@@ -193,54 +188,6 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
         });
     }
 
-    /*private String uploadRecord() {
-
-        String error_str = "";
-
-        try {
-            for(int i = 0; i < 5; i++) {
-                URL url = new URL(url_str);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setDoOutput(true);
-                conn.setDoInput(true);
-
-                JSONObject params = new JSONObject();
-                params.put("major", 1000);
-                params.put("minor", 522);
-                params.put("rssi", -100000);
-                params.put("testID", "FAKE_TEST");
-                params.put("building_id", FirstScreen.BuildingCodes.get(building));
-                params.put("floor", floor);
-                params.put("x", x);
-                params.put("y", y);
-                params.put("interval", scan_period);
-
-                Log.i("JSON", params.toString());
-                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-
-                os.writeBytes(params.toString());
-                os.flush();
-
-                Log.i("STATUS + " + i, String.valueOf(conn.getResponseCode()));
-                Log.i("MSG", conn.getResponseMessage());
-
-                if (conn.getResponseCode() != 200) {
-                    error_str += "Error " + conn.getResponseCode() + ": " + conn.getResponseMessage() + "\n";
-                }
-
-                os.close();
-                conn.disconnect();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return error_str;
-    }*/
-
 
     /*
     * This function will upload the test case to the
@@ -256,6 +203,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
 
         try {
             for (IBeacon beacon : beaconList) {
+
                 URL url = new URL(url_str);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
@@ -263,19 +211,32 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
-                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
-                os.writeBytes(getParamObj(beacon).toString());
+                String params = getParamObj(beacon).toString();
+
+                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                os.writeBytes(params);
                 os.flush();
 
                 if (conn.getResponseCode() != 200) {
                     error_str += "Error " + conn.getResponseCode() + ": " + conn.getResponseMessage() + "\n";
+                    error_str += params + ": \n\n";
                 }
+
                 os.close();
                 conn.disconnect();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch(IOException e) {
+            error_str += "IOException has occurred\n";
+            error_str += e.getStackTrace();
+        }
+        catch(JSONException e) {
+            error_str += "JSON exception has occurred\n";
+            error_str += e.getStackTrace();
+        }
+        catch(Exception e) {
+            error_str += "Some random exception\n";
             error_str += e.getStackTrace();
         }
 
@@ -288,14 +249,15 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
      * to POST to the server for UploadRecord.
      * */
 
-    private JSONObject getParamObj(IBeacon beacon) throws Exception {
+    private JSONObject getParamObj(IBeacon beacon) throws JSONException {
         JSONObject params = new JSONObject();
 
         params.put("major", beacon.getMajor());
         params.put("minor", beacon.getMinor());
         params.put("rssi", beacon.getRssi());
-        params.put("testID", "Test" + testID);
-        params.put("building_id", FirstScreen.BuildingCodes.get(building));
+        //params.put("testID", "Test" + testID);
+        params.put("testID", "FAKE_TEST_3");
+        params.put("building_id", building);
         params.put("floor", floor);
         params.put("x", x);
         params.put("y", y);
@@ -383,6 +345,9 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     private final RangeNotifier beaconCB = new RangeNotifier() {
         @Override
         public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+            if(!scan_enabled)
+                return;
+
             for(Beacon x:beacons){
                 beaconList.add(new IBeacon(x.getRssi(), x.getId2().toInt(),x.getId3().toInt(),x.getId1().toString()));
                 mapInterface.renderBeaconByMajorMinor(x.getId2().toInt(), x.getId3().toInt(), x.getRssi());

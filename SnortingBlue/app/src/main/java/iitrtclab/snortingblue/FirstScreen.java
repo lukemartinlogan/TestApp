@@ -44,6 +44,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.HashMap;
+import java.util.Hashtable;
 
 public class FirstScreen extends AppCompatActivity  {
 
@@ -70,8 +71,8 @@ public class FirstScreen extends AppCompatActivity  {
     public static final String[] floors3 = {"Floor", "00", "01", "02"};
 
     //Building HashMaps
-    public static final HashMap<String, String[]> BuildingToFloors = new HashMap<String, String[]>();
-    public static final HashMap<String, Integer> BuildingCodes = new HashMap<String, Integer>();
+    public static final Hashtable<String, String[]> BuildingToFloors = new Hashtable<String, String[]>();
+    public static final Hashtable<String, Integer> BuildingCodes = new Hashtable<String, Integer>();
 
     //The javascript interface to manipulating the map
     MapInterface mapInterface;

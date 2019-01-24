@@ -12,6 +12,7 @@ package iitrtclab.snortingblue;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
@@ -30,6 +31,8 @@ public class ThirdScreen extends AppCompatActivity {
 
         Intent intent = getIntent();
         TextView ErrorDialog = findViewById(R.id.ErrorDialog);
+        ErrorDialog.setMovementMethod(new ScrollingMovementMethod());
+
         String errorDialog = intent.getStringExtra(SecondScreen.errorDialogKey);
         ErrorDialog.setText(errorDialog);
     }

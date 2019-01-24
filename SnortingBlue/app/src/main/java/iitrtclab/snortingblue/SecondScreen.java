@@ -88,7 +88,7 @@ public class SecondScreen extends AppCompatActivity {
             double y = Double.parseDouble(Y);
             int floor = Integer.parseInt(Floor);
             int duration = Integer.parseInt(Duration);
-            testCase.start(Building, floor, x, y, duration);
+            testCase.start(FirstScreen.BuildingCodes.get(Building), floor, x, y, duration);
         }
         catch(Exception e) {
             finish();

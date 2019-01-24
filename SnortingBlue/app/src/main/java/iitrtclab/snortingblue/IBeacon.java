@@ -24,27 +24,27 @@ public class IBeacon {
 
     /* GETTERS AND SETTERS */
 
-    public String getRssi() {
+    public int getRssi() {
         int sum = 0;
         for (int x:rssiSet)
             sum+=x;
-        return String.valueOf(sum/rssiSet.size());
+        return sum/rssiSet.size();
     }
 
     public void add(int rssi) {
         rssiSet.add(rssi);
     }
 
-    public String getMajor() {
-        return Integer.toString(major);
+    public int getMajor() {
+        return major;
     }
 
     public void setMajor(int major) {
         this.major = major;
     }
 
-    public String getMinor() {
-        return Integer.toString(minor);
+    public int getMinor() {
+        return minor;
     }
 
     public void setMinor(int minor) {

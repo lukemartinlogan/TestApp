@@ -73,7 +73,7 @@ function removeAllBeacons() {
 }
 
 function renderBeaconByMajorMinor(major, minor, rssi, mobile) {
-	$.get(`https://api.iitrtclab.com/beacons/AM/01`, (beacons, err) => {
+	$.get(`https://api.iitrtclab.com/beacons/SB/01`, (beacons, err) => {
 		beacons.forEach((beacon) => {
 			if (beacon.major === major && beacon.minor === minor) {
 				setBeacon(beacon, mobile, {rssi: rssi});
