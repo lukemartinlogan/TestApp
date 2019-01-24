@@ -24,10 +24,10 @@
         android:id="@+id/Duration"
         android:layout_width="80dp"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/Floor"
         android:ems="10"
         android:hint="@string/Duration"
-        android:inputType="number|numberDecimal"
-        android:layout_toRightOf="@+id/Floor"/>
+        android:inputType="number" />
 
     <TextView
         android:id="@+id/X"

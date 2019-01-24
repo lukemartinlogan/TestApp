@@ -56,7 +56,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     private Timer timer = null;         //The timer that will scan for BLE signals
     private double period = .5;         //How many seconds until timer rescans for signals
     private double current_time = 0;    //How many seconds have elapsed since timer started
-    private double scan_period = 5;     //How many seconds the timer should last
+    private int scan_period = 5;        //How many seconds the timer should last
 
     //Test case information
     private int testID;
@@ -108,7 +108,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     * every "period" seconds.
     * */
 
-    public void start(String building, int floor, double x, double y, double scan_period) {
+    public void start(String building, int floor, double x, double y, int scan_period) {
         try {
             this.scan_period = scan_period;
             this.building = building;
@@ -207,27 +207,27 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
 
-                JSONObject jsonParam = new JSONObject();
-                jsonParam.put("major", 1000);
-                jsonParam.put("minor", 522);
-                jsonParam.put("rssi", -100000);
-                jsonParam.put("testID", "FAKE_TEST");
-                jsonParam.put("building_id", 5000);
-                jsonParam.put("floor", 1);
-                jsonParam.put("x", 1234);
-                jsonParam.put("y", 1234);
-                jsonParam.put("interval", 5);
+                JSONObject params = new JSONObject();
+                params.put("major", 1000);
+                params.put("minor", 522);
+                params.put("rssi", -100000);
+                params.put("testID", "FAKE_TEST");
+                params.put("building_id", FirstScreen.BuildingCodes.get(building));
+                params.put("floor", floor);
+                params.put("x", x);
+                params.put("y", y);
+                params.put("interval", scan_period);
 
-                Log.i("JSON", jsonParam.toString());
+                Log.i("JSON", params.toString());
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
-                os.writeBytes(jsonParam.toString());
+                os.writeBytes(params.toString());
                 os.flush();
 
                 Log.i("STATUS + " + i, String.valueOf(conn.getResponseCode()));
                 Log.i("MSG", conn.getResponseMessage());
 
-                if(conn.getResponseCode() != 200) {
+                if (conn.getResponseCode() != 200) {
                     error_str += "Error " + conn.getResponseCode() + ": " + conn.getResponseMessage() + "\n";
                 }
 
@@ -249,6 +249,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     * their attributes as parameters to an HTTP POST method.
     * */
 
+
     private String uploadRecord() {
 
         String error_str = "";
@@ -263,7 +264,8 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                os.writeBytes(getParamString(beacon).toString());
+
+                os.writeBytes(getParamObj(beacon).toString());
                 os.flush();
 
                 if (conn.getResponseCode() != 200) {
@@ -286,7 +288,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
      * to POST to the server for UploadRecord.
      * */
 
-    private JSONObject getParamString(IBeacon beacon) throws Exception {
+    private JSONObject getParamObj(IBeacon beacon) throws Exception {
         JSONObject params = new JSONObject();
 
         params.put("major", beacon.getMajor());
@@ -295,8 +297,8 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
         params.put("testID", "Test" + testID);
         params.put("building_id", FirstScreen.BuildingCodes.get(building));
         params.put("floor", floor);
-        params.put("x", "" + x);
-        params.put("y", "" + y);
+        params.put("x", x);
+        params.put("y", y);
         params.put("interval", scan_period);
 
         return params;
