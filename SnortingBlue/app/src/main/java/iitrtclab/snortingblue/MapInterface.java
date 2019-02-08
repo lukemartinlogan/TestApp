@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Hashtable;
 import java.util.Locale;
 
 public class MapInterface extends WebViewClient {
@@ -51,6 +52,7 @@ public class MapInterface extends WebViewClient {
     String beacon_path = "Building/Floor";      //Where to get beacon data from in BOSSA
     double x=0, y=0;                            //The location of the tester
     TextView xView, yView;
+    Hashtable<String, IBeacon> uniqueBeacons;
 
 
     /*CONSTRUCTORS*/
@@ -60,6 +62,7 @@ public class MapInterface extends WebViewClient {
         this.context = context;
         this.xView = xView;
         this.yView = yView;
+        this.uniqueBeacons = new Hashtable<String, IBeacon>();
     }
 
 
@@ -110,6 +113,11 @@ public class MapInterface extends WebViewClient {
 
 
     /*
+    * This function clears the list of unique beacons.
+    * */
+
+
+    /*
     * This function sets the position of the tester. I assume
     * this is called before setMap.
     * */
@@ -123,10 +131,12 @@ public class MapInterface extends WebViewClient {
     /*
     * This function will render a beacon on
     * the map. I assume this is called after
-    * setMap.
+    * setMap. It will also acquire the position
+    * information for a beacon.
     * */
 
     public void renderBeaconByMajorMinor(IBeacon beacon) {
+        uniqueBeacons.put("" + beacon.getMajor() + "-" + beacon.getMinor(), beacon);
 
         Thread t = new Thread(new MapRunnable(beacon.getMajor(), beacon.getMinor(), beacon.getRssi(), this) {
             @Override
@@ -135,12 +145,21 @@ public class MapInterface extends WebViewClient {
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        map.loadUrl("javascript:renderBeaconByMajorMinor(" +
+
+                        System.out.println("RENDER BEACON PARAMS: " +
                                 major + "," +
                                 minor + "," +
                                 rssi + "," +
                                 "true" + "," +
                                 beacon_path +
+                                ")");
+
+                        map.loadUrl("javascript:renderBeaconByMajorMinor(" +
+                                major + "," +
+                                minor + "," +
+                                rssi + "," +
+                                "true" + "," +
+                                "\"" + beacon_path + "\"" +
                                 ")");
                     }
                 });
@@ -158,9 +177,8 @@ public class MapInterface extends WebViewClient {
      * */
 
     public void removeAllBeacons() {
-        //map.loadUrl("javascript:removeAllBeacons()");
+        map.loadUrl("javascript:removeAllBeacons()");
     }
-
 
 
     /*JAVASCRIPT INTERFACES*/
@@ -194,13 +212,16 @@ public class MapInterface extends WebViewClient {
     /*
     * This function gets the location
     * of a beacon from the database.
-    * To be completed...
+    * It will remove the beacon from
     * */
 
     @JavascriptInterface
-    public void setBeaconLocationJS(double x, double y, IBeacon beacon)
+    public void setBeaconLocationJS(int major, int minor, double x, double y)
     {
-        beacon.x  = x;
-        beacon.y = y;
+        System.out.println("MAJOR: " + major + " MINOR: " + minor + " (" + x + ", " + y + ")");
+
+        String key = "" + major + "-" + minor;
+        IBeacon beacon = uniqueBeacons.get(key);
+        beacon.setPosition(x, y);
     }
 }

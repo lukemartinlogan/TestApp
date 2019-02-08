@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Timer;
@@ -163,11 +164,16 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     public void run() {
         if(current_time >= scan_period) {
             stop();
-            String errors = uploadRecord();
+            /*String errors = uploadRecord();
             errorDialog(errors);
-            finish();
+            finish();*/
             return;
         }
+
+        //Very temporary test of renderBeaconByMajorMinor and setMap
+        System.out.println("RENDERING BEACON!!!");
+        IBeacon beac = new IBeacon(-54, 1000, 518, "");
+        mapInterface.renderBeaconByMajorMinor(beac);
 
         current_time += period;
         updateProgress();

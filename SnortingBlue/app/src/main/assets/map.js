@@ -9,7 +9,7 @@ $(document).ready(function() {
 
 function setTestingLocation(x, y, mobile) {
 
-	//console.log("SET TESTING LOCATION IN JS!!!");
+	console.log("SET TESTING LOCATION IN JS!!!");
 
 	if(c1 == null) {
 		c1 = d3.select('svg').append("circle")
@@ -34,9 +34,16 @@ function setTestingLocation(x, y, mobile) {
 	c2
 		.attr("cx", mapX(x))
 		.attr("cy", mapY(y));
-	
-	
-	//console.log("SET TESTING LOCATION NEARLY OUT OF JS!!!");
+
+
+	if(typeof(window.mapInterface) === "undefined")
+	{
+	    setTimeout(function() { setTestingLocation(x, y, mobile) }, 250);
+	    return;
+    }
+
+	console.log("SET TESTING LOCATION NEARLY OUT OF JS!!!");
+	console.log(window.mapInterface);
 	window.mapInterface.setTestingLocationJS(x, y);
 }
 
@@ -78,6 +85,9 @@ function renderBeaconByMajorMinor(major, minor, rssi, mobile, map) {
 
 	$.get(url, (beacons, err) => {
 		beacons.forEach((beacon) => {
+		    console.log(beacon.major)
+		    console.log(" ")
+		    console.log(beacon.minor)
 			if (beacon.major === major && beacon.minor === minor) {
 				setBeacon(beacon, mobile, {rssi: rssi});
 			}
@@ -86,12 +96,23 @@ function renderBeaconByMajorMinor(major, minor, rssi, mobile, map) {
 }
 
 function toggleSettingLocation(toggle, mobile) {
+
+    console.log("TOGGLE SETTING LOCATION!!!");
+
 	if (toggle) {
 		d3.select('svg').on("click", function () {
 			// This function will run when someone clicks on map when toggle mode is activated
 			let coordinates = d3.mouse(this);
 			let position = realPosition(coordinates[0], coordinates[1], mobile);
 			setTestingLocationPX(coordinates[0], coordinates[1]);
+
+			if(typeof(window.mapInterface) === "undefined")
+			{
+                setTimeout(function() { toggleSettingLocation(toggle, mobile) }, 250);
+                return;
+            }
+            console.log("TOGGLE NEARLY OUT OF JS!!!");
+            console.log(window.mapInterface);
 			window.mapInterface.setTestingLocationJS(position.x, position.y);
 		});
 	} else {
@@ -116,6 +137,17 @@ function realPosition(svgX, svgY, mobile) {
 
 function setBeacon(beacon, mobile, beaconRssi) {
 
+    console.log("SETTING BEACON!!!");
+    console.log("X: ");
+    console.log(beacon.x)
+
+    if(typeof(window.mapInterface) === "undefined")
+    {
+        setTimeout(function() { setBeacon(beacon, mobile, beaconRssi) }, 250);
+        return;
+    }
+    console.log("SET BEACON OUT OF JS!!!");
+    console.log(window.mapInterface);
     window.mapInterface.setBeaconLocationJS(beacon.major, beacon.minor, beacon.x, beacon.y);
 
 	if (mobile) {

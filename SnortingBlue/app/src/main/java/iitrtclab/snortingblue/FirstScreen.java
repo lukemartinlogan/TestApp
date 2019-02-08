@@ -171,11 +171,6 @@ public class FirstScreen extends AppCompatActivity  {
         map.getSettings().setBuiltInZoomControls(true);
         map.setWebViewClient(mapInterface);
         map.addJavascriptInterface(mapInterface, "mapInterface");
-
-        //Very temporary test of renderBeaconByMajorMinor and setMap
-        mapInterface.setMap("file:///android_asset/AM-01.html", "AM", "01");
-        IBeacon beac = new IBeacon(-54, 1000, 518, "");
-        mapInterface.renderBeaconByMajorMinor(beac);
     }
 
 
