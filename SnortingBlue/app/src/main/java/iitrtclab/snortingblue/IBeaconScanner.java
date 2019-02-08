@@ -349,8 +349,9 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
                 return;
 
             for(Beacon x:beacons){
-                beaconList.add(new IBeacon(x.getRssi(), x.getId2().toInt(),x.getId3().toInt(),x.getId1().toString()));
-                mapInterface.renderBeaconByMajorMinor(x.getId2().toInt(), x.getId3().toInt(), x.getRssi());
+                IBeacon beacon = new IBeacon(x.getRssi(), x.getId2().toInt(),x.getId3().toInt(),x.getId1().toString());
+                beaconList.add(beacon);
+                mapInterface.renderBeaconByMajorMinor(beacon);
             }
         }
     };

@@ -48,7 +48,8 @@ public class MapInterface extends WebViewClient {
     boolean enableLocSetting = true;
 
     //Test case data
-    double x=0, y=0;           //The location of the tester
+    String beacon_path = "Building/Floor";      //Where to get beacon data from in BOSSA
+    double x=0, y=0;                            //The location of the tester
     TextView xView, yView;
 
 
@@ -91,8 +92,9 @@ public class MapInterface extends WebViewClient {
     * I assume this is called on the UI thread.
     * */
 
-    public void setMap(String path) {
+    public void setMap(String path, String building, String floor) {
         map.loadUrl(path);
+        beacon_path = building + "/" + floor;
     }
 
 
@@ -124,16 +126,22 @@ public class MapInterface extends WebViewClient {
     * setMap.
     * */
 
-    public void renderBeaconByMajorMinor(int major, int minor, int rssi) {
+    public void renderBeaconByMajorMinor(IBeacon beacon) {
 
-        Thread t = new Thread(new MapRunnable(major, minor, rssi, this) {
+        Thread t = new Thread(new MapRunnable(beacon.getMajor(), beacon.getMinor(), beacon.getRssi(), this) {
             @Override
             public void run() {
                 while(!master.loaded);
                 master.context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        map.loadUrl("javascript:renderBeaconByMajorMinor(" + major + "," + minor + "," + rssi + "," + "true" + ")");
+                        map.loadUrl("javascript:renderBeaconByMajorMinor(" +
+                                major + "," +
+                                minor + "," +
+                                rssi + "," +
+                                "true" + "," +
+                                beacon_path +
+                                ")");
                     }
                 });
             }
@@ -190,7 +198,9 @@ public class MapInterface extends WebViewClient {
     * */
 
     @JavascriptInterface
-    public void getBeaconLocation(IBeacon beacon)
+    public void setBeaconLocationJS(double x, double y, IBeacon beacon)
     {
+        beacon.x  = x;
+        beacon.y = y;
     }
 }

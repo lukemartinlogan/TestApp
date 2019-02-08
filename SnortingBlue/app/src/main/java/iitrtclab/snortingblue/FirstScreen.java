@@ -171,6 +171,11 @@ public class FirstScreen extends AppCompatActivity  {
         map.getSettings().setBuiltInZoomControls(true);
         map.setWebViewClient(mapInterface);
         map.addJavascriptInterface(mapInterface, "mapInterface");
+
+        //Very temporary test of renderBeaconByMajorMinor and setMap
+        mapInterface.setMap("file:///android_asset/AM-01.html", "AM", "01");
+        IBeacon beac = new IBeacon(-54, 1000, 518, "");
+        mapInterface.renderBeaconByMajorMinor(beac);
     }
 
 
@@ -192,12 +197,12 @@ public class FirstScreen extends AppCompatActivity  {
             getResources().getAssets().open(building + "-" + floor + ".html");
             mapInterface.toggleSettingLocation(true);
             mapInterface.setTestingLocation(0,0);
-            mapInterface.setMap(path);
+            mapInterface.setMap(path, building, floor);
         }
         catch(Exception e) {
             if(map.getUrl() != null)
                 if(!map.getUrl().equals(default_map))
-                    mapInterface.setMap(default_map);
+                    mapInterface.setMap(default_map, "Building", "Floor");
         }
     }
 

@@ -78,7 +78,7 @@ public class SecondScreen extends AppCompatActivity {
             //Set test information
             mapInterface.toggleSettingLocation(false);
             mapInterface.setTestingLocation(Double.parseDouble(X), Double.parseDouble(Y));
-            mapInterface.setMap("file:///android_asset/" + Building + "-" + Floor + ".html");
+            mapInterface.setMap("file:///android_asset/" + Building + "-" + Floor + ".html", Building, Floor);
 
             //Create bluetooth scanner
             testCase = new IBeaconScanner(this, mapInterface, (ProgressBar)findViewById(R.id.progressBar2), .5);

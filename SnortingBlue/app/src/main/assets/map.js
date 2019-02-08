@@ -72,8 +72,11 @@ function removeAllBeacons() {
 	d3.selectAll('.beacons').remove();
 }
 
-function renderBeaconByMajorMinor(major, minor, rssi, mobile) {
-	$.get(`https://api.iitrtclab.com/beacons/SB/01`, (beacons, err) => {
+function renderBeaconByMajorMinor(major, minor, rssi, mobile, map) {
+    url = "https://api.iitrtclab.com/beacons/"
+    url.concat(map)
+
+	$.get(url, (beacons, err) => {
 		beacons.forEach((beacon) => {
 			if (beacon.major === major && beacon.minor === minor) {
 				setBeacon(beacon, mobile, {rssi: rssi});
@@ -112,14 +115,14 @@ function realPosition(svgX, svgY, mobile) {
 }
 
 function setBeacon(beacon, mobile, beaconRssi) {
+
+    window.mapInterface.setBeaconLocationJS(beacon.major, beacon.minor, beacon.x, beacon.y);
+
 	if (mobile) {
 		renderBeacon(mapX(beacon.x), mapY(beacon.y), beacon, beaconRssi);
-		
 	} else {
 		const newX = mapX(parseFloat(d3.select('svg').attr('data-width'), 10)) - mapX(beacon.x);
 		renderBeacon(mapY(beacon.y), newX, beacon, beaconRssi);
-		
-		
 	}
 }
 
@@ -191,7 +194,6 @@ function inverseMapX(svgX) {
 	const out_max = parseFloat(d3.select('svg').attr('data-width'), 10);
 	return (svgX - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-
 
 function mapY (y) {
 	const origin = d3.select('.origin').filter('path').node().getBBox();

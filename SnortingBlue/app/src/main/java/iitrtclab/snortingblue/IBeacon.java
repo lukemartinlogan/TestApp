@@ -11,6 +11,7 @@ public class IBeacon {
     private int major, minor;
     private String uuid;
     private LinkedList<Integer> rssiSet;
+    private double x, y;
 
     /* CONSTRUCTORS */
 
@@ -49,6 +50,11 @@ public class IBeacon {
 
     public void setMinor(int minor) {
         this.minor = minor;
+    }
+
+    public void setPosition(double x, double y) {
+        this.x = x;
+        this.y = y;
     }
 
     public String getUuid() {
