@@ -24,6 +24,10 @@
 * This file will allow users to define the parameters of a test case:
 *   - Position of the tester: (Building, floor_true, x_true, y_true)
 *   - Duration: the number of seconds to scan for
+*
+*   NOTE: I'm trying to make it so that the test app can send the position of the beacons to the
+*   database as well. This will require renderBeaconByMajorMinor to do a little more work. I modified
+*   the "run" function in IBeaconScanner to do this.
 * */
 
 package iitrtclab.snortingblue;

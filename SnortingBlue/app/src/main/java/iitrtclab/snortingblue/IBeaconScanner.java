@@ -172,7 +172,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
 
         //Very temporary test of renderBeaconByMajorMinor and setMap
         System.out.println("RENDERING BEACON!!!");
-        IBeacon beac = new IBeacon(-54, 1000, 518, "");
+        IBeacon beac = new IBeacon(-54, 1000, 588, "");
         mapInterface.renderBeaconByMajorMinor(beac);
 
         current_time += period;

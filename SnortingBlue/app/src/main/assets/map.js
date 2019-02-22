@@ -9,7 +9,7 @@ $(document).ready(function() {
 
 function setTestingLocation(x, y, mobile) {
 
-	console.log("SET TESTING LOCATION IN JS!!!");
+	//console.log("SET TESTING LOCATION IN JS!!!");
 
 	if(c1 == null) {
 		c1 = d3.select('svg').append("circle")
@@ -42,8 +42,8 @@ function setTestingLocation(x, y, mobile) {
 	    return;
     }
 
-	console.log("SET TESTING LOCATION NEARLY OUT OF JS!!!");
-	console.log(window.mapInterface);
+	//console.log("SET TESTING LOCATION NEARLY OUT OF JS!!!");
+	//console.log(window.mapInterface);
 	window.mapInterface.setTestingLocationJS(x, y);
 }
 
@@ -83,12 +83,18 @@ function renderBeaconByMajorMinor(major, minor, rssi, mobile, map) {
     url = "https://api.iitrtclab.com/beacons/"
     url.concat(map)
 
+    console.log("In renderBeaconByMajorMinor");
+
+    if(typeof(window.mapInterface) === "undefined")
+     {
+         console.log("MAP INTERFACE NOT DEFINED -- renderBeaconByMajorMinor!!!");
+     }
+
 	$.get(url, (beacons, err) => {
 		beacons.forEach((beacon) => {
-		    console.log(beacon.major)
-		    console.log(" ")
-		    console.log(beacon.minor)
 			if (beacon.major === major && beacon.minor === minor) {
+			    console.log("FOUND MATCH!: ");
+			    console.log(beacon);
 				setBeacon(beacon, mobile, {rssi: rssi});
 			}
 		});
@@ -141,14 +147,9 @@ function setBeacon(beacon, mobile, beaconRssi) {
     console.log("X: ");
     console.log(beacon.x)
 
-    if(typeof(window.mapInterface) === "undefined")
-    {
-        setTimeout(function() { setBeacon(beacon, mobile, beaconRssi) }, 250);
-        return;
-    }
     console.log("SET BEACON OUT OF JS!!!");
-    console.log(window.mapInterface);
     window.mapInterface.setBeaconLocationJS(beacon.major, beacon.minor, beacon.x, beacon.y);
+    console.log("SHOULD HAVE CALLED SET BEACON LOCATION!!!");
 
 	if (mobile) {
 		renderBeacon(mapX(beacon.x), mapY(beacon.y), beacon, beaconRssi);

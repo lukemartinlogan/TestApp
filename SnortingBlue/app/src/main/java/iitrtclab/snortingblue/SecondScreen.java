@@ -74,6 +74,7 @@ public class SecondScreen extends AppCompatActivity {
             map.getSettings().setJavaScriptEnabled(true);
             map.getSettings().setBuiltInZoomControls(true);
             map.setWebViewClient(mapInterface);
+            map.addJavascriptInterface(mapInterface, "mapInterface");
 
             //Set test information
             mapInterface.toggleSettingLocation(false);
