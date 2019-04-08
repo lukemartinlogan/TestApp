@@ -9,7 +9,7 @@ $(document).ready(function() {
 
 function setTestingLocation(x, y, mobile) {
 
-	//console.log("SET TESTING LOCATION IN JS!!!");
+	console.log("SET TESTING LOCATION IN JS!!!");
 
 	if(c1 == null) {
 		c1 = d3.select('svg').append("circle")
@@ -42,8 +42,8 @@ function setTestingLocation(x, y, mobile) {
 	    return;
     }
 
-	//console.log("SET TESTING LOCATION NEARLY OUT OF JS!!!");
-	//console.log(window.mapInterface);
+	console.log("SET TESTING LOCATION NEARLY OUT OF JS!!!");
+	console.log(window.mapInterface);
 	window.mapInterface.setTestingLocationJS(x, y);
 }
 
@@ -80,15 +80,10 @@ function removeAllBeacons() {
 }
 
 function renderBeaconByMajorMinor(major, minor, rssi, mobile, map) {
-    url = "https://api.iitrtclab.com/beacons/"
-    url.concat(map)
+    url = "https://api.iitrtclab.com/beacons/";
+    url.concat(map);
 
     console.log("In renderBeaconByMajorMinor");
-
-    if(typeof(window.mapInterface) === "undefined")
-     {
-         console.log("MAP INTERFACE NOT DEFINED -- renderBeaconByMajorMinor!!!");
-     }
 
 	$.get(url, (beacons, err) => {
 		beacons.forEach((beacon) => {
@@ -112,11 +107,6 @@ function toggleSettingLocation(toggle, mobile) {
 			let position = realPosition(coordinates[0], coordinates[1], mobile);
 			setTestingLocationPX(coordinates[0], coordinates[1]);
 
-			if(typeof(window.mapInterface) === "undefined")
-			{
-                setTimeout(function() { toggleSettingLocation(toggle, mobile) }, 250);
-                return;
-            }
             console.log("TOGGLE NEARLY OUT OF JS!!!");
             console.log(window.mapInterface);
 			window.mapInterface.setTestingLocationJS(position.x, position.y);
@@ -125,7 +115,7 @@ function toggleSettingLocation(toggle, mobile) {
 		d3.select('svg').on('click', null);
 	}
 	
-	//console.log("TOGGLE SETTING LOCATION JS!!!\n");
+	console.log("TOGGLE SETTING LOCATION JS!!!");
 }
 
 //returns real life x and y from locked origin in meters

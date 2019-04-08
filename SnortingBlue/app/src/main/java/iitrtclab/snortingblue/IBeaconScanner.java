@@ -93,6 +93,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
             this.beaconManager = BeaconManager.getInstanceForApplication(context);
             this.beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
             this.beaconManager.setForegroundScanPeriod(Math.round(period*1000));
+
             progressBar.setMax(100);
         }
         catch(Exception e) {
@@ -164,16 +165,11 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
     public void run() {
         if(current_time >= scan_period) {
             stop();
-            /*String errors = uploadRecord();
+            String errors = uploadRecord();
             errorDialog(errors);
-            finish();*/
+            finish();
             return;
         }
-
-        //Very temporary test of renderBeaconByMajorMinor and setMap
-        System.out.println("RENDERING BEACON!!!");
-        IBeacon beac = new IBeacon(-54, 1000, 588, "");
-        mapInterface.renderBeaconByMajorMinor(beac);
 
         current_time += period;
         updateProgress();
@@ -261,8 +257,7 @@ public class IBeaconScanner extends TimerTask implements BeaconConsumer {
         params.put("major", beacon.getMajor());
         params.put("minor", beacon.getMinor());
         params.put("rssi", beacon.getRssi());
-        //params.put("testID", "Test" + testID);
-        params.put("testID", "FAKE_TEST_3");
+        params.put("testID", "Test" + testID);
         params.put("building_id", building);
         params.put("floor", floor);
         params.put("x", x);

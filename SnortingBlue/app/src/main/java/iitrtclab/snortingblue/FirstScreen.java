@@ -193,6 +193,7 @@ public class FirstScreen extends AppCompatActivity  {
                 return;
 
         try {
+            System.out.println("SETTING MAP???");
             getResources().getAssets().open(building + "-" + floor + ".html");
             mapInterface.toggleSettingLocation(true);
             mapInterface.setTestingLocation(0,0);

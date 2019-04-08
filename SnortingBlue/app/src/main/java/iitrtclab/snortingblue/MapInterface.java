@@ -74,7 +74,6 @@ public class MapInterface extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        //System.out.println("PAGE STARTED!!!");
         loaded = false;
     }
 
@@ -84,6 +83,7 @@ public class MapInterface extends WebViewClient {
 
     public void onPageFinished(WebView view, String url) {
         loaded = true;
+        System.out.println("PAGE LOADED???");
         map.loadUrl("javascript:setTestingLocation(" + x + "," + y + ")");
         map.loadUrl("javascript:toggleSettingLocation(" + enableLocSetting + "," + "true" + ")");
 
@@ -96,8 +96,8 @@ public class MapInterface extends WebViewClient {
     * */
 
     public void setMap(String path, String building, String floor) {
-        map.loadUrl(path);
         beacon_path = building + "/" + floor;
+        map.loadUrl(path);
     }
 
 

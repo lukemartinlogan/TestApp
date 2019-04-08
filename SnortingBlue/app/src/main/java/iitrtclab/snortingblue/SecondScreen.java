@@ -113,6 +113,9 @@ public class SecondScreen extends AppCompatActivity {
 
     /*
     * Test Functions
+    *
+    * These were just to get the program working.
+    * Are not used in practice.
     * */
 
     /*
